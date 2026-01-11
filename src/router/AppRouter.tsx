@@ -37,7 +37,7 @@ const router = createBrowserRouter([
         ],
       },
 
-      { path: '*', element: <Navigate to="/spells" replace /> },
+      { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
 ]);
