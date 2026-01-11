@@ -2,6 +2,7 @@ import { AppShell, Burger } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
 import { CharactersNavbar } from '../../features/characters/CharactersNavbar';
+import { CiBag1 } from 'react-icons/ci';
 
 export function AppShellLayout() {
   const [opened, { toggle }] = useDisclosure();
@@ -18,7 +19,7 @@ export function AppShellLayout() {
     >
       <AppShell.Header>
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <div style={{ paddingLeft: 12 }}>Logo</div>
+        <CiBag1 />
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
