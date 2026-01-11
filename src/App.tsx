@@ -1,9 +1,20 @@
-function App() {
+import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
+import { AppRouter } from './router/AppRouter';
+import { theme } from './theme';
+import { ThemeBarSync } from './components/ThemeBarSync';
+
+import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
+import '@mantine/dates/styles.css';
+import './styles/index.css';
+
+export default function App() {
   return (
-    <div>
-      <p>Bag of holding</p>
-    </div>
+    <MantineProvider theme={theme} defaultColorScheme="auto">
+      <ThemeBarSync />
+      <Notifications position="bottom-center" />
+      <AppRouter />
+    </MantineProvider>
   );
 }
-
-export default App;
