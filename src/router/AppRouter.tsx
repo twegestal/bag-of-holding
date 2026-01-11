@@ -10,6 +10,8 @@ import { LoginPage } from '../components/auth/Login';
 import { RegisterPage } from '../components/auth/Register';
 import { AuthCallback } from '../components/auth/AuthCallback';
 import { AppShellLayout } from '../components/layout/AppShellLayout';
+import { CharactersPage } from '../features/characters/CharactersPage';
+import { CharacterItemsPage } from '../features/characters/CharacterItemPage';
 
 function RouterLevelProviders() {
   return (
@@ -32,12 +34,19 @@ const router = createBrowserRouter([
         children: [
           {
             element: <AppShellLayout />,
-            children: [{ index: true, element: <Navigate to="/" replace /> }],
+            children: [
+              { index: true, element: <Navigate to="/characters" replace /> },
+              { path: '/characters', element: <CharactersPage /> },
+              {
+                path: '/characters/:characterId',
+                element: <CharacterItemsPage />,
+              },
+            ],
           },
         ],
       },
 
-      { path: '*', element: <Navigate to="/" replace /> },
+      { path: '*', element: <Navigate to="/characters" replace /> },
     ],
   },
 ]);
