@@ -41,3 +41,21 @@ export function useCreateCharacter() {
     },
   });
 }
+
+export function useDeleteCharacter() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (characterId: string) => {
+      const { error } = await supabase
+        .from('characters')
+        .delete()
+        .eq('id', characterId);
+
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['characters'] });
+    },
+  });
+}

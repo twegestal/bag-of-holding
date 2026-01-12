@@ -9,8 +9,8 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { useCategories } from './categories.queries';
-import { useCreateCharacterItem } from './items.mutations';
+import { useCategories } from '../categories/categories.queries';
+import { useCreateCharacterItem } from '../items/items.mutations';
 
 type Props = {
   opened: boolean;

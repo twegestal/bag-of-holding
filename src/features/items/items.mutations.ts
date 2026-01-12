@@ -131,7 +131,6 @@ export function useDecrementItemQuantity(characterId: string) {
   return useMutation({
     mutationFn: async (item: { id: string; quantity: number }) => {
       if (item.quantity <= 1) {
-        // delete if quantity is 1
         const { error } = await supabase
           .from('character_items')
           .delete()

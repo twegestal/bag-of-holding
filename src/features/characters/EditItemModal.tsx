@@ -10,8 +10,8 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import type { CharacterItem } from '../../types/character';
-import { useCategories } from './categories.queries';
-import { useUpdateCharacterItem } from './items.mutations';
+import { useCategories } from '../categories/categories.queries';
+import { useUpdateCharacterItem } from '../items/items.mutations';
 
 type Props = {
   opened: boolean;

@@ -1,36 +1,75 @@
-import { NavLink, Stack, Text, Button, Skeleton } from '@mantine/core';
+import {
+  AppShell,
+  NavLink,
+  Stack,
+  Skeleton,
+  Divider,
+  ScrollArea,
+} from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
+import { CiLogout, CiUser } from 'react-icons/ci';
 import { useCharacters } from './queries';
+import { useAuth } from '../../contexts/auth';
 
-export function CharactersNavbar() {
+type Props = {
+  onNavigate?: () => void;
+};
+
+export function CharactersNavbar({ onNavigate }: Props) {
   const navigate = useNavigate();
   const { characterId } = useParams();
   const { data, isLoading } = useCharacters();
+  const { logout } = useAuth();
+
+  const goTo = (path: string) => {
+    navigate(path);
+    onNavigate?.();
+  };
 
   return (
-    <Stack gap="sm">
-      <Text fw={700}>Characters</Text>
-
-      {isLoading && (
-        <>
-          <Skeleton h={28} />
-          <Skeleton h={28} />
-          <Skeleton h={28} />
-        </>
-      )}
-
-      {(data ?? []).map((c) => (
+    <>
+      <AppShell.Section>
         <NavLink
-          key={c.id}
-          label={c.name}
-          active={c.id === characterId}
-          onClick={() => navigate(`/characters/${c.id}`)}
+          label="Characters"
+          leftSection={<CiUser size={16} />}
+          fw={700}
+          onClick={() => goTo('/characters')}
         />
-      ))}
+      </AppShell.Section>
 
-      <Button variant="light" onClick={() => navigate('/characters')}>
-        Manage
-      </Button>
-    </Stack>
+      <AppShell.Section grow component={ScrollArea} offsetScrollbars>
+        <Stack gap="sm">
+          {isLoading && (
+            <>
+              <Skeleton h={28} />
+              <Skeleton h={28} />
+              <Skeleton h={28} />
+            </>
+          )}
+
+          {(data ?? []).map((c) => (
+            <NavLink
+              key={c.id}
+              label={c.name}
+              active={c.id === characterId}
+              onClick={() => goTo(`/characters/${c.id}`)}
+            />
+          ))}
+        </Stack>
+      </AppShell.Section>
+
+      <AppShell.Section>
+        <Divider my="sm" />
+        <NavLink
+          label="Log out"
+          leftSection={<CiLogout size={16} />}
+          color="red"
+          onClick={() => {
+            logout();
+            onNavigate?.();
+          }}
+        />
+      </AppShell.Section>
+    </>
   );
 }

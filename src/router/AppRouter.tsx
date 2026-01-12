@@ -6,10 +6,10 @@ import {
 } from 'react-router-dom';
 import { ModalsProvider } from '@mantine/modals';
 import { RequireAuth } from './RequireAuth';
-import { LoginPage } from '../components/auth/Login';
-import { RegisterPage } from '../components/auth/Register';
-import { AuthCallback } from '../components/auth/AuthCallback';
-import { AppShellLayout } from '../components/layout/AppShellLayout';
+import { LoginPage } from '../core/auth/Login';
+import { RegisterPage } from '../core/auth/Register';
+import { AuthCallback } from '../core/auth/AuthCallback';
+import { AppShellLayout } from '../core/layout/AppShellLayout';
 import { CharactersPage } from '../features/characters/CharactersPage';
 import { CharacterItemsPage } from '../features/characters/CharacterItemPage';
 
