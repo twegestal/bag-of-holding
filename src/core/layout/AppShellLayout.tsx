@@ -2,7 +2,7 @@ import { AppShell, Burger, Group, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Outlet } from 'react-router-dom';
 import { CharactersNavbar } from '../../features/characters/CharactersNavbar';
-import { CiBag1 } from 'react-icons/ci';
+import { SiDungeonsanddragons } from 'react-icons/si';
 
 export function AppShellLayout() {
   const [opened, { toggle, close }] = useDisclosure();
@@ -22,7 +22,7 @@ export function AppShellLayout() {
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
 
           <Group gap="xs">
-            <CiBag1 size={28} />
+            <SiDungeonsanddragons size={28} />
             <Text fw={700}>Bag of Hoarding</Text>
           </Group>
         </Group>

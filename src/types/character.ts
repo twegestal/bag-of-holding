@@ -19,3 +19,13 @@ export type Category = {
   id: string;
   name: string;
 };
+
+export type CharacterCurrency = {
+  id: string;
+  character_id: string;
+  pp: number;
+  gp: number;
+  ep: number;
+  sp: number;
+  cp: number;
+};

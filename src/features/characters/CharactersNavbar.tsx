@@ -6,10 +6,13 @@ import {
   Divider,
   ScrollArea,
 } from '@mantine/core';
-import { useNavigate, useParams } from 'react-router-dom';
-import { CiLogout, CiUser } from 'react-icons/ci';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { CiLogout } from 'react-icons/ci';
+import { FaCoins } from 'react-icons/fa6';
+import { GiAxeSword } from 'react-icons/gi';
 import { useCharacters } from './queries';
 import { useAuth } from '../../contexts/auth';
+import { useEffect, useState } from 'react';
 
 type Props = {
   onNavigate?: () => void;
@@ -17,21 +20,32 @@ type Props = {
 
 export function CharactersNavbar({ onNavigate }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { characterId } = useParams();
   const { data, isLoading } = useCharacters();
   const { logout } = useAuth();
+
+  const [openedCharacterId, setOpenedCharacterId] = useState<string | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (characterId) setOpenedCharacterId(characterId);
+  }, [characterId]);
 
   const goTo = (path: string) => {
     navigate(path);
     onNavigate?.();
   };
 
+  const isItemsRoute = location.pathname.includes('/items');
+  const isCurrencyRoute = location.pathname.includes('/currency');
+
   return (
     <>
       <AppShell.Section>
         <NavLink
           label="Characters"
-          leftSection={<CiUser size={16} />}
           fw={700}
           onClick={() => goTo('/characters')}
         />
@@ -47,14 +61,34 @@ export function CharactersNavbar({ onNavigate }: Props) {
             </>
           )}
 
-          {(data ?? []).map((c) => (
-            <NavLink
-              key={c.id}
-              label={c.name}
-              active={c.id === characterId}
-              onClick={() => goTo(`/characters/${c.id}`)}
-            />
-          ))}
+          {(data ?? []).map((c) => {
+            const isOpen = openedCharacterId === c.id;
+            const isActiveCharacter = characterId === c.id;
+
+            return (
+              <NavLink
+                key={c.id}
+                label={c.name}
+                active={isActiveCharacter}
+                opened={isOpen}
+                onChange={() => setOpenedCharacterId(isOpen ? null : c.id)}
+              >
+                <NavLink
+                  label="Items"
+                  leftSection={<GiAxeSword size={16} />}
+                  active={isActiveCharacter && isItemsRoute}
+                  onClick={() => goTo(`/characters/${c.id}/items`)}
+                />
+
+                <NavLink
+                  label="Currency"
+                  leftSection={<FaCoins size={16} />}
+                  active={isActiveCharacter && isCurrencyRoute}
+                  onClick={() => goTo(`/characters/${c.id}/currency`)}
+                />
+              </NavLink>
+            );
+          })}
         </Stack>
       </AppShell.Section>
 
