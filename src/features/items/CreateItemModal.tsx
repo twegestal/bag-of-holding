@@ -65,6 +65,8 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
       <form onSubmit={onSubmit}>
         <TextInput
           label="Name"
+          type="tel"
+          inputMode="numeric"
           placeholder="e.g. Longsword"
           {...form.getInputProps('name')}
           autoFocus
@@ -73,6 +75,8 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
         <Group grow mt="sm">
           <NumberInput
             label="Quantity"
+            type="tel"
+            inputMode="numeric"
             min={0}
             {...form.getInputProps('quantity')}
           />

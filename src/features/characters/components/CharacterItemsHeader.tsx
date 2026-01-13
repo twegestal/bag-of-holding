@@ -17,6 +17,8 @@ export function CharacterItemsHeader({
 
       <TextInput
         placeholder="Search inventory..."
+        type="tel"
+        inputMode="numeric"
         value={search}
         onChange={(e) => onSearchChange(e.currentTarget.value)}
         w={320}

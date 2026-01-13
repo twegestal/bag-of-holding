@@ -149,30 +149,40 @@ export function CharacterCurrencyPage() {
           <SimpleGrid cols={{ base: 2, sm: 5 }} spacing="sm">
             <NumberInput
               label="PP"
+              type="tel"
+              inputMode="numeric"
               min={0}
               hideControls
               {...adjustForm.getInputProps('pp')}
             />
             <NumberInput
               label="GP"
+              type="tel"
+              inputMode="numeric"
               min={0}
               hideControls
               {...adjustForm.getInputProps('gp')}
             />
             <NumberInput
               label="EP"
+              type="tel"
+              inputMode="numeric"
               min={0}
               hideControls
               {...adjustForm.getInputProps('ep')}
             />
             <NumberInput
               label="SP"
+              type="tel"
+              inputMode="numeric"
               min={0}
               hideControls
               {...adjustForm.getInputProps('sp')}
             />
             <NumberInput
               label="CP"
+              type="tel"
+              inputMode="numeric"
               min={0}
               hideControls
               {...adjustForm.getInputProps('cp')}

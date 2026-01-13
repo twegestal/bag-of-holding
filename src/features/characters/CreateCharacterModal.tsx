@@ -45,6 +45,8 @@ export function CreateCharacterModal({ opened, onClose }: Props) {
       <form onSubmit={onSubmit}>
         <TextInput
           label="Name"
+          type="tel"
+          inputMode="numeric"
           placeholder="e.g. Thorne Ironfist"
           {...form.getInputProps('name')}
           autoFocus

@@ -71,7 +71,13 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
   return (
     <Modal opened={opened} onClose={onClose} title="Edit item" centered>
       <form onSubmit={onSubmit}>
-        <TextInput label="Name" {...form.getInputProps('name')} autoFocus />
+        <TextInput
+          label="Name"
+          type="tel"
+          inputMode="numeric"
+          {...form.getInputProps('name')}
+          autoFocus
+        />
 
         <Select
           label="Category"
