@@ -7,7 +7,7 @@ import {
   ScrollArea,
 } from '@mantine/core';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { CiLogout } from 'react-icons/ci';
+import { CiLogout, CiBag1 } from 'react-icons/ci';
 import { FaCoins } from 'react-icons/fa6';
 import { GiAxeSword } from 'react-icons/gi';
 import { useCharacters } from './queries';
@@ -40,6 +40,7 @@ export function CharactersNavbar({ onNavigate }: Props) {
 
   const isItemsRoute = location.pathname.includes('/items');
   const isCurrencyRoute = location.pathname.includes('/currency');
+  const isMagicItemsRoute = location.pathname.includes('/magic-items');
 
   return (
     <>
@@ -75,7 +76,7 @@ export function CharactersNavbar({ onNavigate }: Props) {
               >
                 <NavLink
                   label="Items"
-                  leftSection={<GiAxeSword size={16} />}
+                  leftSection={<CiBag1 size={16} />}
                   active={isActiveCharacter && isItemsRoute}
                   onClick={() => goTo(`/characters/${c.id}/items`)}
                 />
@@ -85,6 +86,12 @@ export function CharactersNavbar({ onNavigate }: Props) {
                   leftSection={<FaCoins size={16} />}
                   active={isActiveCharacter && isCurrencyRoute}
                   onClick={() => goTo(`/characters/${c.id}/currency`)}
+                />
+                <NavLink
+                  label="Magic items"
+                  leftSection={<GiAxeSword size={16} />}
+                  active={isActiveCharacter && isMagicItemsRoute}
+                  onClick={() => goTo(`/characters/${c.id}/magic-items`)}
                 />
               </NavLink>
             );
