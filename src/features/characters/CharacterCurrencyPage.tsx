@@ -23,7 +23,15 @@ import { applyDelta } from '../currency/currency.math';
 import { COINS } from '../currency/constants';
 import type { Coins } from '../../types/currency';
 
-const ZERO: Coins = { pp: 0, gp: 0, ep: 0, sp: 0, cp: 0 };
+type AdjustCoins = {
+  pp: number | '';
+  gp: number | '';
+  ep: number | '';
+  sp: number | '';
+  cp: number | '';
+};
+
+const EMPTY: AdjustCoins = { pp: '', gp: '', ep: '', sp: '', cp: '' };
 
 export function CharacterCurrencyPage() {
   const { characterId } = useParams();
@@ -37,19 +45,19 @@ export function CharacterCurrencyPage() {
     return { pp: data.pp, gp: data.gp, ep: data.ep, sp: data.sp, cp: data.cp };
   }, [data]);
 
-  const adjustForm = useForm<Coins>({
-    initialValues: ZERO,
+  const adjustForm = useForm<AdjustCoins>({
+    initialValues: EMPTY,
     validate: {
-      pp: (v) => (v < 0 ? 'Must be 0 or higher' : null),
-      gp: (v) => (v < 0 ? 'Must be 0 or higher' : null),
-      ep: (v) => (v < 0 ? 'Must be 0 or higher' : null),
-      sp: (v) => (v < 0 ? 'Must be 0 or higher' : null),
-      cp: (v) => (v < 0 ? 'Must be 0 or higher' : null),
+      pp: (v) => (v !== '' && v < 0 ? 'Must be 0 or higher' : null),
+      gp: (v) => (v !== '' && v < 0 ? 'Must be 0 or higher' : null),
+      ep: (v) => (v !== '' && v < 0 ? 'Must be 0 or higher' : null),
+      sp: (v) => (v !== '' && v < 0 ? 'Must be 0 or higher' : null),
+      cp: (v) => (v !== '' && v < 0 ? 'Must be 0 or higher' : null),
     },
   });
 
   useEffect(() => {
-    adjustForm.setValues(ZERO);
+    adjustForm.setValues(EMPTY);
     adjustForm.resetDirty();
   }, [characterId]);
 
@@ -57,11 +65,11 @@ export function CharacterCurrencyPage() {
     if (!data || !current) return;
 
     const delta: Coins = {
-      pp: adjustForm.values.pp ?? 0,
-      gp: adjustForm.values.gp ?? 0,
-      ep: adjustForm.values.ep ?? 0,
-      sp: adjustForm.values.sp ?? 0,
-      cp: adjustForm.values.cp ?? 0,
+      pp: adjustForm.values.pp === '' ? 0 : adjustForm.values.pp,
+      gp: adjustForm.values.gp === '' ? 0 : adjustForm.values.gp,
+      ep: adjustForm.values.ep === '' ? 0 : adjustForm.values.ep,
+      sp: adjustForm.values.sp === '' ? 0 : adjustForm.values.sp,
+      cp: adjustForm.values.cp === '' ? 0 : adjustForm.values.cp,
     };
 
     const nothingEntered = Object.values(delta).every((v) => v === 0);
@@ -82,7 +90,7 @@ export function CharacterCurrencyPage() {
     try {
       await update.mutateAsync({ id: data.id, ...next });
 
-      adjustForm.setValues(ZERO);
+      adjustForm.setValues(EMPTY);
       adjustForm.resetDirty();
     } catch (e: any) {
       notifications.show({
@@ -213,7 +221,7 @@ export function CharacterCurrencyPage() {
             <Button
               variant="outline"
               onClick={() => {
-                adjustForm.setValues(ZERO);
+                adjustForm.setValues(EMPTY);
                 adjustForm.resetDirty();
               }}
               disabled={update.isPending}
