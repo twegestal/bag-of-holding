@@ -21,15 +21,7 @@ import { useCharacterCurrency } from '../currency/currency.queries';
 import { useUpdateCharacterCurrency } from '../currency/currency.mutations';
 import { applyDelta } from '../currency/currency.math';
 import { COINS } from '../currency/constants';
-import type { Coins } from '../../types/currency';
-
-type AdjustCoins = {
-  pp: number | '';
-  gp: number | '';
-  ep: number | '';
-  sp: number | '';
-  cp: number | '';
-};
+import type { AdjustCoins, Coins } from '../../types/currency';
 
 const EMPTY: AdjustCoins = { pp: '', gp: '', ep: '', sp: '', cp: '' };
 

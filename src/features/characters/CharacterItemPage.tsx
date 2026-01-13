@@ -55,10 +55,6 @@ export function CharacterItemsPage() {
   const onDelete = async (item: CharacterItem) => {
     try {
       await deleteItem.mutateAsync(item.id);
-      notifications.show({
-        title: 'Deleted',
-        message: `${item.name} removed.`,
-      });
     } catch (e: any) {
       notifications.show({
         title: 'Failed to delete',

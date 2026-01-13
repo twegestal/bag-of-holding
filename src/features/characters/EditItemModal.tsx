@@ -58,7 +58,6 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
         categoryId: values.categoryId,
       });
 
-      notifications.show({ title: 'Saved', message: 'Item updated.' });
       onClose();
     } catch (e: any) {
       notifications.show({

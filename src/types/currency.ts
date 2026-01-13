@@ -12,3 +12,11 @@ export type Coins = {
   sp: number;
   cp: number;
 };
+
+export type AdjustCoins = {
+  pp: number | '';
+  gp: number | '';
+  ep: number | '';
+  sp: number | '';
+  cp: number | '';
+};

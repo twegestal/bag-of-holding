@@ -45,11 +45,6 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
         notes: values.notes || null,
       });
 
-      notifications.show({
-        title: 'Item added',
-        message: `${values.name} added to inventory.`,
-      });
-
       form.reset();
       onClose();
     } catch (e: any) {
