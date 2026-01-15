@@ -25,7 +25,7 @@ export function useCharacterItems(characterId: string | undefined) {
       const { data, error } = await supabase
         .from('character_items')
         .select(
-          'id,character_id,name,quantity,notes,weight,created_at,category_id'
+          'id,character_id,name,quantity,notes,weight,created_at,category_id, value_gp'
         )
         .eq('character_id', characterId)
         .order('created_at', { ascending: true });

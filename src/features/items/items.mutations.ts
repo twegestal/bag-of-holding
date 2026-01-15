@@ -8,6 +8,7 @@ type CreateItemInput = {
   quantity: number;
   notes: string | null;
   categoryId: string | null;
+  value_gp: number | null;
 };
 
 export function useCreateCharacterItem(characterId: string) {
@@ -31,9 +32,14 @@ export function useCreateCharacterItem(characterId: string) {
           quantity: input.quantity,
           notes: input.notes?.trim() ? input.notes.trim() : null,
           category_id: input.categoryId,
+          value_gp: input.value_gp,
         })
         .select(
-          'id,character_id,name,quantity,notes,weight,category_id,created_at'
+          'id,character_id,name,quantity,notes,weight,value_gp,category_id,created_at,updated_at'
+        )
+
+        .select(
+          'id,character_id,name,quantity,notes,weight,category_id, value_gp, created_at'
         )
         .single();
 
@@ -54,6 +60,7 @@ type UpdateItemInput = {
   notes: string | null;
   categoryId: string | null;
   weight?: number | null;
+  value_gp?: number | null;
 };
 
 export function useDeleteCharacterItem(characterId: string) {
@@ -80,17 +87,21 @@ export function useUpdateCharacterItem(characterId: string) {
 
   return useMutation({
     mutationFn: async (input: UpdateItemInput): Promise<CharacterItem> => {
+      const updatePayload: Record<string, unknown> = {
+        name: input.name.trim(),
+        notes: input.notes?.trim() ? input.notes.trim() : null,
+        category_id: input.categoryId,
+      };
+
+      if (input.weight !== undefined) updatePayload.weight = input.weight;
+      if (input.value_gp !== undefined) updatePayload.value_gp = input.value_gp;
+
       const { data, error } = await supabase
         .from('character_items')
-        .update({
-          name: input.name.trim(),
-          notes: input.notes?.trim() ? input.notes.trim() : null,
-          category_id: input.categoryId,
-          ...(input.weight !== undefined ? { weight: input.weight } : {}),
-        })
+        .update(updatePayload)
         .eq('id', input.id)
         .select(
-          'id,character_id,name,quantity,notes,weight,category_id,created_at'
+          'id,character_id,name,quantity,notes,weight,value_gp,category_id,created_at,updated_at'
         )
         .single();
 

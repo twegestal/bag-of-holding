@@ -30,6 +30,7 @@ export function CharacterItemsTable({
           <Table.Th>Item</Table.Th>
           <Table.Th w={90}>Qty</Table.Th>
           <Table.Th w={160}>Category</Table.Th>
+          <Table.Th w={160}>Value</Table.Th>
           <Table.Th>Notes</Table.Th>
           <Table.Th w={44}></Table.Th>
         </Table.Tr>
@@ -43,6 +44,7 @@ export function CharacterItemsTable({
             <Table.Td>
               {i.category_id ? categoryMap.get(i.category_id) : ''}
             </Table.Td>
+            <Table.Td>{i.value_gp ?? ''}</Table.Td>
             <Table.Td>{i.notes ?? ''}</Table.Td>
             <Table.Td>
               <CharacterItemActionsMenu

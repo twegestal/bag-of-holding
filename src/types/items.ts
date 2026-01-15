@@ -1,28 +1,46 @@
 export type ItemCard = {
   name: string;
 
-  type?: string;
+  type: string;
+  slot: string;
+  value: string;
 
-  slot?: string;
-
-  attunement?: {
+  attunement: {
     required: boolean;
-    note?: string;
+    note: string;
   };
 
-  value?: string;
-
   sections: Array<{
-    title?: string;
+    title: string;
     body: string;
   }>;
 
-  image?: {
+  image: {
     hasArt: boolean;
   };
 
-  confidence?: {
+  confidence: {
     overall: number;
-    warnings?: string[];
+    warnings: string[];
+  };
+};
+
+export type CharacterMagicItemRow = {
+  id: string;
+  character_id: string;
+  card_id: string;
+  quantity: number;
+  is_equipped: boolean;
+  created_at: string;
+
+  card: {
+    id: string;
+    name: string;
+    type: string;
+    slot: string;
+    value: string;
+    attunement_required: boolean;
+    has_art: boolean;
+    sections: Array<{ title: string; body: string }>;
   };
 };

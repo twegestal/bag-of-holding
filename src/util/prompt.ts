@@ -7,7 +7,7 @@ Return ONLY valid JSON (no markdown, no explanation). The JSON must follow this 
   "type"?: string,
   "slot"?: string,
   "value"?: string,
-  "attunement"?: { "required": boolean, "note"?: string },
+  "attunement"?: { "required": boolean, "note": string },
   "sections": [{ "title"?: string, "body": string }],
   "image"?: { "hasArt": boolean },
   "confidence"?: { "overall": number, "warnings"?: string[] }
@@ -20,10 +20,12 @@ Rules:
    - slot: from a line like "Slot: (Ring)" or similar
    - value: from a line like "Value: (Unique)" or "Value: Priceless" or similar
 3) Attunement:
-   - If the card explicitly says it requires attunement (e.g. "requires attunement"), set attunement.required = true.
-   - If it explicitly says it does NOT require attunement, set attunement.required = false.
-   - If it is not mentioned, omit the "attunement" field entirely.
-   - If there is any extra attunement note (e.g. "requires attunement by X"), put it in attunement.note.
+   - If the card explicitly says it requires attunement (e.g. "requires attunement"), include "attunement" and set attunement.required = true.
+   - If it explicitly says it does NOT require attunement, include "attunement" and set attunement.required = false.
+   - If attunement is not mentioned, omit the "attunement" field entirely.
+   - If "attunement" is included, always include attunement.note:
+       - Use the specific note text if present (e.g. "requires attunement by a wizard").
+       - Otherwise set attunement.note = "".
 4) Sections:
    - The card usually contains one or more text blocks like "Effect:", "Lore:", "Notes:", etc.
    - For each block, create one entry in "sections" in top-to-bottom order.

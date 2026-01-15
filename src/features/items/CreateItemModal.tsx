@@ -27,11 +27,13 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
       name: '',
       quantity: 1,
       categoryId: null as string | null,
+      valueGp: null as number | null,
       notes: '',
     },
     validate: {
       name: (v) => (v.trim().length === 0 ? 'Item name is required' : null),
       quantity: (v) => (v < 0 ? 'Quantity must be 0 or higher' : null),
+      valueGp: (v) => (v != null && v < 0 ? 'Value must be 0 or higher' : null),
     },
   });
 
@@ -42,6 +44,7 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
         name: values.name,
         quantity: values.quantity ?? 1,
         categoryId: values.categoryId,
+        value_gp: values.valueGp,
         notes: values.notes || null,
       });
 
@@ -87,6 +90,16 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
             {...form.getInputProps('categoryId')}
           />
         </Group>
+
+        <NumberInput
+          label="Value (gp)"
+          placeholder="Optional"
+          mt="sm"
+          min={0}
+          hideControls
+          thousandSeparator
+          {...form.getInputProps('valueGp')}
+        />
 
         <Textarea
           label="Notes"

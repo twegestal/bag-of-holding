@@ -6,6 +6,7 @@ import {
   Select,
   TextInput,
   Textarea,
+  NumberInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
@@ -29,9 +30,11 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
       name: '',
       notes: '',
       categoryId: null as string | null,
+      valueGp: null as number | null,
     },
     validate: {
       name: (v) => (v.trim().length === 0 ? 'Item name is required' : null),
+      valueGp: (v) => (v != null && v < 0 ? 'Value must be 0 or higher' : null),
     },
   });
 
@@ -42,10 +45,11 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
       name: item.name,
       notes: item.notes ?? '',
       categoryId: item.category_id,
+      valueGp: item.value_gp,
     });
 
     form.resetDirty();
-  }, [opened, item?.id]);
+  }, [opened, item?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSubmit = form.onSubmit(async (values) => {
     if (!item) return;
@@ -56,6 +60,7 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
         name: values.name,
         notes: values.notes || null,
         categoryId: values.categoryId,
+        value_gp: values.valueGp,
       });
 
       onClose();
@@ -70,13 +75,7 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
   return (
     <Modal opened={opened} onClose={onClose} title="Edit item" centered>
       <form onSubmit={onSubmit}>
-        <TextInput
-          label="Name"
-          type="tel"
-          inputMode="numeric"
-          {...form.getInputProps('name')}
-          autoFocus
-        />
+        <TextInput label="Name" {...form.getInputProps('name')} autoFocus />
 
         <Select
           label="Category"
@@ -85,6 +84,17 @@ export function EditItemModal({ opened, onClose, characterId, item }: Props) {
           mt="sm"
           data={(categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
           {...form.getInputProps('categoryId')}
+        />
+
+        <NumberInput
+          label="Value (gp)"
+          placeholder="Optional"
+          mt="sm"
+          min={0}
+          allowNegative={false}
+          thousandSeparator
+          hideControls
+          {...form.getInputProps('valueGp')}
         />
 
         <Textarea

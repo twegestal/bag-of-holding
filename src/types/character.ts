@@ -11,8 +11,10 @@ export type CharacterItem = {
   quantity: number;
   notes: string | null;
   weight: number | null;
-  created_at: string;
   category_id: string | null;
+  value_gp: number | null;
+  created_at: string;
+  updated_at?: string;
 };
 
 export type Category = {

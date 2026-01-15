@@ -14,6 +14,8 @@ import { CharactersPage } from '../features/characters/CharactersPage';
 import { CharacterItemsPage } from '../features/characters/CharacterItemPage';
 import { CharacterCurrencyPage } from '../features/characters/CharacterCurrencyPage';
 import { MagicItemsPage } from '../features/items/MagicItemsPage';
+import { MagicItemsNewPage } from '../features/items/MagicItemsNewPage';
+import { MagicItemsGrid } from '../features/items/MagicItemsGrid';
 
 function RouterLevelProviders() {
   return (
@@ -45,7 +47,16 @@ const router = createBrowserRouter([
                   { index: true, element: <Navigate to="items" replace /> },
                   { path: 'items', element: <CharacterItemsPage /> },
                   { path: 'currency', element: <CharacterCurrencyPage /> },
-                  { path: 'magic-items', element: <MagicItemsPage /> },
+
+                  // NEW:
+                  {
+                    path: 'magic-items',
+                    element: <MagicItemsPage />,
+                    children: [
+                      { index: true, element: <MagicItemsGrid /> },
+                      { path: 'new', element: <MagicItemsNewPage /> },
+                    ],
+                  },
                 ],
               },
             ],
