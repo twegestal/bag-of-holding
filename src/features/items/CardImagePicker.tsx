@@ -64,7 +64,11 @@ export function CardImagePicker({ characterId }: Props) {
       const form = new FormData();
       form.append('image', file);
 
-      const res = await fetch('/api/scan', {
+      const API_BASE = import.meta.env.DEV
+        ? '/api'
+        : (import.meta.env.VITE_API_URL as string).replace(/\/$/, '');
+
+      const res = await fetch(`${API_BASE}/scan`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
