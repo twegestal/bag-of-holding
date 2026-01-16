@@ -39,6 +39,32 @@ export function CardImagePicker({ characterId }: Props) {
   const apiBase = useMemo(() => '/api', []);
   const scanUrl = useMemo(() => `${apiBase}/scan`, [apiBase]);
 
+  const debug = (title: string, message?: string) => {
+    notifications.show({
+      title,
+      message: message ?? '',
+      // keep it visible long enough on iPad
+      autoClose: 8000,
+    });
+  };
+
+  const fmtBytes = (n: number) => {
+    if (!Number.isFinite(n)) return String(n);
+    if (n < 1024) return `${n} B`;
+    const kb = n / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    const mb = kb / 1024;
+    return `${mb.toFixed(1)} MB`;
+  };
+
+  useEffect(() => {
+    debug('CardImagePicker mounted', `UA: ${navigator.userAgent}`);
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -53,26 +79,64 @@ export function CardImagePicker({ characterId }: Props) {
 
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(f ? URL.createObjectURL(f) : null);
+
+    if (!f) {
+      debug('Image cleared');
+      return;
+    }
+
+    debug(
+      'Image picked',
+      `${f.name || '(no name)'} • ${f.type || 'no type'} • ${fmtBytes(f.size)}`,
+    );
   };
 
-  const openPicker = () => inputRef.current?.click();
+  const openPicker = () => {
+    debug('Open picker', `inputRef: ${inputRef.current ? 'ok' : 'null'}`);
+    inputRef.current?.click();
+  };
 
   const onScan = async () => {
-    if (!file) return;
+    if (!file) {
+      debug('Scan aborted', 'No file selected');
+      return;
+    }
 
     setIsScanning(true);
     setResult(null);
 
+    debug(
+      'Scan start',
+      `${file.name || '(no name)'} • ${file.type || 'no type'} • ${fmtBytes(
+        file.size,
+      )}`,
+    );
+
     try {
       let uploadFile = file;
 
-      if (shouldDownscale(file)) {
+      const willDownscale = shouldDownscale(file);
+      debug('Downscale check', willDownscale ? 'YES' : 'NO');
+
+      if (willDownscale) {
         try {
+          debug('Downscaling...', 'maxSide=1600, quality=0.7');
           uploadFile = await downscaleImageToJpeg(file, {
             maxSide: 1600,
             quality: 0.7,
           });
-        } catch {
+
+          debug(
+            'Downscale done',
+            `${uploadFile.name || '(no name)'} • ${uploadFile.type || 'no type'} • ${fmtBytes(
+              uploadFile.size,
+            )}`,
+          );
+        } catch (e) {
+          debug(
+            'Downscale failed (fallback to original)',
+            e instanceof Error ? e.message : String(e),
+          );
           uploadFile = file;
         }
       }
@@ -80,18 +144,38 @@ export function CardImagePicker({ characterId }: Props) {
       const form = new FormData();
       form.append('image', uploadFile);
 
+      debug(
+        'POST /scan',
+        `url=${scanUrl} • auth=${token ? 'yes' : 'no'} • upload=${uploadFile.type || 'no type'} • ${fmtBytes(
+          uploadFile.size,
+        )}`,
+      );
+
       const res = await fetch(scanUrl, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
       });
 
+      debug(
+        'Response',
+        `${res.status} ${res.statusText || ''} • content-type=${res.headers.get('content-type') || '(none)'}`,
+      );
+
       if (!res.ok) {
         const text = await res.text().catch(() => '');
-        throw new Error(text || `Scan failed (${res.status})`);
+        const msg = text || `Scan failed (${res.status})`;
+        debug('Response body (error)', msg.slice(0, 1200));
+        throw new Error(msg);
       }
 
       const data = (await res.json()) as ItemCard;
+
+      debug(
+        'Parsed OK',
+        `${data?.name || '(no name)'} • sections=${data?.sections?.length ?? 0}`,
+      );
+
       setResult(data);
 
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -102,13 +186,24 @@ export function CardImagePicker({ characterId }: Props) {
         title: 'Scan failed',
         message: e instanceof Error ? e.message : String(e),
       });
+
+      debug(
+        'Scan exception',
+        e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+      );
     } finally {
       setIsScanning(false);
+      debug('Scan end');
     }
   };
 
   const onSave = async () => {
-    if (!result) return;
+    if (!result) {
+      debug('Save aborted', 'No scan result');
+      return;
+    }
+
+    debug('Save start', result.name || '(no name)');
 
     try {
       await saveMagicItem.mutateAsync({
@@ -118,6 +213,7 @@ export function CardImagePicker({ characterId }: Props) {
         isEquipped: false,
       });
 
+      debug('Save success');
       onDiscard();
       navigate('..', { relative: 'path' });
     } catch (e) {
@@ -125,11 +221,18 @@ export function CardImagePicker({ characterId }: Props) {
         title: 'Failed to save',
         message: e instanceof Error ? e.message : String(e),
       });
+
+      debug(
+        'Save failed',
+        e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+      );
     }
   };
 
   const onDiscard = () => {
     if (isScanning) return;
+
+    debug('Discard');
 
     setResult(null);
     setFile(null);
@@ -159,7 +262,14 @@ export function CardImagePicker({ characterId }: Props) {
               accept="image/*"
               capture="environment"
               style={{ display: 'none' }}
-              onChange={(e) => onPick(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const f = e.target.files?.[0] ?? null;
+                debug(
+                  'Input change',
+                  `files=${e.target.files?.length ?? 0} • picked=${f ? `${f.type || 'no type'} • ${fmtBytes(f.size)}` : 'null'}`,
+                );
+                onPick(f);
+              }}
             />
 
             <Group>
