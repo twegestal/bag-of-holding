@@ -123,14 +123,25 @@ export function CardImagePicker({ characterId }: Props) {
       });
 
       if (!res.ok) {
+        const contentType = res.headers.get('content-type') ?? '';
         const text = await res.text().catch(() => '');
-        throw new Error(text || `Request failed (${res.status})`);
+        throw new Error(
+          JSON.stringify(
+            {
+              status: res.status,
+              statusText: res.statusText,
+              contentType,
+              bodyPreview: text.slice(0, 500),
+            },
+            null,
+            2
+          )
+        );
       }
 
       const data = (await res.json()) as ItemCard;
       setResult(data);
 
-      // Hide the image once we have a result, so you only see the generated card.
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
       setFile(null);
