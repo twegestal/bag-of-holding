@@ -12,26 +12,20 @@ import {
   Title,
   Box,
 } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
 import type { ItemCard } from '../../types/items';
 import { useAuth } from '../../contexts/auth';
 import { useSaveMagicItem } from './magicItems.mutations';
-import { notifications } from '@mantine/notifications';
-import { useNavigate } from 'react-router-dom';
+import {
+  downscaleImageToJpeg,
+  getImageMeta,
+  shouldDownscale,
+} from '../../util/image';
 
 type Props = {
   characterId: string;
 };
-
-function formatBytes(bytes: number) {
-  if (!Number.isFinite(bytes)) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  const mb = kb / 1024;
-  if (mb < 1024) return `${mb.toFixed(2)} MB`;
-  const gb = mb / 1024;
-  return `${gb.toFixed(2)} GB`;
-}
 
 export function CardImagePicker({ characterId }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -41,20 +35,12 @@ export function CardImagePicker({ characterId }: Props) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [isScanning, setIsScanning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ItemCard | null>(null);
-
-  const [imgMeta, setImgMeta] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
 
   const { token } = useAuth();
   const saveMagicItem = useSaveMagicItem(characterId);
 
-  // IMPORTANT:
-  // Always call relative "/api" so requests are same-origin in prod once you add a Vercel rewrite.
-  // In dev, Vite can proxy "/api" to your microservice (see files below).
+  // Same-origin via Vercel rewrite + Vite dev proxy
   const apiBase = useMemo(() => '/api', []);
   const scanUrl = useMemo(() => `${apiBase}/scan`, [apiBase]);
 
@@ -64,37 +50,10 @@ export function CardImagePicker({ characterId }: Props) {
     };
   }, [previewUrl]);
 
-  useEffect(() => {
-    if (!previewUrl) {
-      setImgMeta(null);
-      return;
-    }
-
-    let cancelled = false;
-    const img = new window.Image();
-
-    img.onload = () => {
-      if (cancelled) return;
-      setImgMeta({ width: img.naturalWidth, height: img.naturalHeight });
-    };
-
-    img.onerror = () => {
-      if (cancelled) return;
-      setImgMeta(null);
-    };
-
-    img.src = previewUrl;
-
-    return () => {
-      cancelled = true;
-    };
-  }, [previewUrl]);
-
   const onPick = (f: File | null) => {
     if (isScanning) return;
 
     setFile(f);
-    setError(null);
     setResult(null);
 
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -107,13 +66,13 @@ export function CardImagePicker({ characterId }: Props) {
     if (!file) return;
 
     setIsScanning(true);
-    setError(null);
     setResult(null);
 
     try {
-      let uploadFile = file;
+      const meta = await getImageMeta(file).catch(() => null);
 
-      if (isLikelyMobileHugeImage(file, imgMeta)) {
+      let uploadFile = file;
+      if (shouldDownscale(file, meta)) {
         uploadFile = await downscaleImageToJpeg(file, {
           maxSide: 1600,
           quality: 0.7,
@@ -130,20 +89,8 @@ export function CardImagePicker({ characterId }: Props) {
       });
 
       if (!res.ok) {
-        const contentType = res.headers.get('content-type') ?? '';
         const text = await res.text().catch(() => '');
-        throw new Error(
-          JSON.stringify(
-            {
-              status: res.status,
-              statusText: res.statusText,
-              contentType,
-              bodyPreview: text.slice(0, 500),
-            },
-            null,
-            2
-          )
-        );
+        throw new Error(text || `Scan failed (${res.status})`);
       }
 
       const data = (await res.json()) as ItemCard;
@@ -153,7 +100,10 @@ export function CardImagePicker({ characterId }: Props) {
       setPreviewUrl(null);
       setFile(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      notifications.show({
+        title: 'Scan failed',
+        message: e instanceof Error ? e.message : String(e),
+      });
     } finally {
       setIsScanning(false);
     }
@@ -180,80 +130,14 @@ export function CardImagePicker({ characterId }: Props) {
     }
   };
 
-  const onPing = async () => {
-    const res = await fetch(`${apiBase}/health`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-    });
-    const text = await res.text();
-
-    notifications.show({
-      title: text,
-      message: '',
-      color: 'green',
-    });
-
-    console.log(res.status, text);
-  };
-
   const onDiscard = () => {
     if (isScanning) return;
 
-    setError(null);
     setResult(null);
     setFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
-    setImgMeta(null);
   };
-
-  async function downscaleImageToJpeg(
-    file: File,
-    opts?: { maxSide?: number; quality?: number }
-  ): Promise<File> {
-    const maxSide = opts?.maxSide ?? 1600;
-    const quality = opts?.quality ?? 0.7;
-
-    // Decode
-    const bitmap = await createImageBitmap(file);
-
-    const { width, height } = bitmap;
-    const scale = Math.min(1, maxSide / Math.max(width, height));
-    const targetW = Math.max(1, Math.round(width * scale));
-    const targetH = Math.max(1, Math.round(height * scale));
-
-    const canvas = document.createElement('canvas');
-    canvas.width = targetW;
-    canvas.height = targetH;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas 2D context not available');
-
-    ctx.drawImage(bitmap, 0, 0, targetW, targetH);
-
-    const blob: Blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error('Failed to encode image'))),
-        'image/jpeg',
-        quality
-      );
-    });
-
-    const outName =
-      file.name.replace(/\.(heic|heif|png|webp|jpg|jpeg)$/i, '') + '.jpg';
-    return new File([blob], outName, {
-      type: 'image/jpeg',
-      lastModified: Date.now(),
-    });
-  }
-
-  function isLikelyMobileHugeImage(
-    file: File,
-    meta: { width: number; height: number } | null
-  ) {
-    if (!meta) return false;
-    // Heuristik: typiska iPhone-foton
-    return meta.width >= 2500 && meta.height >= 2500 && file.size > 500_000;
-  }
 
   return (
     <Box pos="relative">
@@ -293,63 +177,10 @@ export function CardImagePicker({ characterId }: Props) {
                 Clear
               </Button>
 
-              <Button onClick={onPing}>Ping</Button>
-
               <Button onClick={onScan} disabled={!file || isScanning}>
                 Scan
               </Button>
             </Group>
-
-            {(file || error) && (
-              <Card withBorder radius="md" p="md">
-                <Stack gap={6}>
-                  <Text fw={600}>Debug</Text>
-
-                  <Text size="sm">
-                    <b>Scan URL:</b> {scanUrl}
-                  </Text>
-
-                  <Text size="sm">
-                    <b>Auth token:</b>{' '}
-                    {token ? `present (${token.length} chars)` : 'missing'}
-                  </Text>
-
-                  {file && (
-                    <>
-                      <Text size="sm">
-                        <b>Filename:</b> {file.name}
-                      </Text>
-                      <Text size="sm">
-                        <b>MIME type:</b> {file.type || '(empty)'}
-                      </Text>
-                      <Text size="sm">
-                        <b>Size:</b> {formatBytes(file.size)} ({file.size}{' '}
-                        bytes)
-                      </Text>
-                      <Text size="sm">
-                        <b>Last modified:</b>{' '}
-                        {new Date(file.lastModified).toISOString()}
-                      </Text>
-                      <Text size="sm">
-                        <b>Dimensions:</b>{' '}
-                        {imgMeta
-                          ? `${imgMeta.width}×${imgMeta.height}`
-                          : '(unknown)'}
-                      </Text>
-                    </>
-                  )}
-
-                  {error && <Text c="red">{error}</Text>}
-                </Stack>
-              </Card>
-            )}
-
-            <Text size="sm">
-              <b>API_BASE:</b> {apiBase}
-            </Text>
-            <Text size="sm">
-              <b>Window origin:</b> {window.location.origin}
-            </Text>
 
             {previewUrl && (
               <Image
@@ -384,10 +215,6 @@ export function CardImagePicker({ characterId }: Props) {
                   </Badge>
                 </Group>
               </Stack>
-
-              <Badge variant="light">
-                {(result.confidence.overall * 100).toFixed(0)}%
-              </Badge>
             </Group>
 
             <Divider my="sm" />
