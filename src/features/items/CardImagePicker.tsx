@@ -52,12 +52,10 @@ export function CardImagePicker({ characterId }: Props) {
   const { token } = useAuth();
   const saveMagicItem = useSaveMagicItem(characterId);
 
-  const apiBase = useMemo(() => {
-    return import.meta.env.DEV
-      ? '/api'
-      : (import.meta.env.VITE_API_URL as string).replace(/\/$/, '');
-  }, []);
-
+  // IMPORTANT:
+  // Always call relative "/api" so requests are same-origin in prod once you add a Vercel rewrite.
+  // In dev, Vite can proxy "/api" to your microservice (see files below).
+  const apiBase = useMemo(() => '/api', []);
   const scanUrl = useMemo(() => `${apiBase}/scan`, [apiBase]);
 
   useEffect(() => {
@@ -118,7 +116,10 @@ export function CardImagePicker({ characterId }: Props) {
 
       const res = await fetch(scanUrl, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          // Do NOT set Content-Type for FormData; browser will set boundary correctly.
+        },
         body: form,
       });
 
@@ -178,11 +179,13 @@ export function CardImagePicker({ characterId }: Props) {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
     const text = await res.text();
+
     notifications.show({
       title: text,
       message: '',
       color: 'green',
     });
+
     console.log(res.status, text);
   };
 
@@ -234,6 +237,7 @@ export function CardImagePicker({ characterId }: Props) {
               >
                 Clear
               </Button>
+
               <Button onClick={onPing}>Ping</Button>
 
               <Button onClick={onScan} disabled={!file || isScanning}>
