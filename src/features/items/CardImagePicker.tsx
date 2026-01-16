@@ -53,6 +53,13 @@ export function CardImagePicker({ characterId }: Props) {
   const onPick = (f: File | null) => {
     if (isScanning) return;
 
+    if (f) {
+      notifications.show({
+        title: 'Picked image',
+        message: `${f.name} (${f.type || 'no type'})`,
+      });
+    }
+
     setFile(f);
     setResult(null);
 
