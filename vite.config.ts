@@ -3,6 +3,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import legacy from '@vitejs/plugin-legacy';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -10,7 +11,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-
+      legacy({
+        targets: ['defaults', 'iOS >= 14'],
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['d20-black.webp', 'icons/180.png'],
@@ -70,7 +73,7 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      target: 'es2022',
+      target: 'es2018',
       sourcemap: false,
     },
 
