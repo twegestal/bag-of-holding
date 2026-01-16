@@ -17,23 +17,11 @@ import { useNavigate } from 'react-router-dom';
 import type { ItemCard } from '../../types/items';
 import { useAuth } from '../../contexts/auth';
 import { useSaveMagicItem } from './magicItems.mutations';
-import {
-  downscaleImageToJpeg,
-  getImageMeta,
-  shouldDownscale,
-} from '../../util/image';
+import { downscaleImageToJpeg, shouldDownscale } from '../../util/image';
 
 type Props = {
   characterId: string;
 };
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  const mb = kb / 1024;
-  return `${mb.toFixed(2)} MB`;
-}
 
 export function CardImagePicker({ characterId }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -60,13 +48,6 @@ export function CardImagePicker({ characterId }: Props) {
   const onPick = (f: File | null) => {
     if (isScanning) return;
 
-    if (f) {
-      notifications.show({
-        title: 'Picked image',
-        message: `${f.name} (${f.type || 'no type'})`,
-      });
-    }
-
     setFile(f);
     setResult(null);
 
@@ -83,31 +64,18 @@ export function CardImagePicker({ characterId }: Props) {
     setResult(null);
 
     try {
-      const meta = await getImageMeta(file).catch(() => null);
-
       let uploadFile = file;
-      const originalSize = file.size;
 
-      if (shouldDownscale(file, meta)) {
+      if (shouldDownscale(file)) {
         try {
           uploadFile = await downscaleImageToJpeg(file, {
             maxSide: 1600,
             quality: 0.7,
           });
         } catch {
-          // iPad Safari can fail image decode/encode — fail open
           uploadFile = file;
         }
       }
-
-      // 🔍 TEMP DEBUG: show what is actually sent
-      notifications.show({
-        title: 'Image upload size',
-        message: `Original: ${formatBytes(originalSize)} → Upload: ${formatBytes(
-          uploadFile.size,
-        )}`,
-        autoClose: 4000,
-      });
 
       const form = new FormData();
       form.append('image', uploadFile);

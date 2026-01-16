@@ -51,12 +51,8 @@ export async function getImageMeta(
   }
 }
 
-export function shouldDownscale(
-  file: File,
-  meta: { width: number; height: number } | null,
-) {
-  if (!meta) return file.size > 500_000;
-  return meta.width >= 2500 && meta.height >= 2500 && file.size > 500_000;
+export function shouldDownscale(file: File) {
+  return file.size > 1_000_000;
 }
 
 async function decodeImage(file: File): Promise<{
