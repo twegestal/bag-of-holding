@@ -173,6 +173,19 @@ export function CardImagePicker({ characterId }: Props) {
     }
   };
 
+  const onPing = async () => {
+    const res = await fetch(`${apiBase}/health`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    const text = await res.text();
+    notifications.show({
+      title: text,
+      message: '',
+      color: 'green',
+    });
+    console.log(res.status, text);
+  };
+
   const onDiscard = () => {
     if (isScanning) return;
 
@@ -221,6 +234,7 @@ export function CardImagePicker({ characterId }: Props) {
               >
                 Clear
               </Button>
+              <Button onClick={onPing}>Ping</Button>
 
               <Button onClick={onScan} disabled={!file || isScanning}>
                 Scan
@@ -270,6 +284,13 @@ export function CardImagePicker({ characterId }: Props) {
                 </Stack>
               </Card>
             )}
+
+            <Text size="sm">
+              <b>API_BASE:</b> {apiBase}
+            </Text>
+            <Text size="sm">
+              <b>Window origin:</b> {window.location.origin}
+            </Text>
 
             {previewUrl && (
               <Image
