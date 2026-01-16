@@ -111,15 +111,21 @@ export function CardImagePicker({ characterId }: Props) {
     setResult(null);
 
     try {
+      let uploadFile = file;
+
+      if (isLikelyMobileHugeImage(file, imgMeta)) {
+        uploadFile = await downscaleImageToJpeg(file, {
+          maxSide: 1600,
+          quality: 0.7,
+        });
+      }
+
       const form = new FormData();
-      form.append('image', file);
+      form.append('image', uploadFile);
 
       const res = await fetch(scanUrl, {
         method: 'POST',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          // Do NOT set Content-Type for FormData; browser will set boundary correctly.
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: form,
       });
 
@@ -199,6 +205,55 @@ export function CardImagePicker({ characterId }: Props) {
     setPreviewUrl(null);
     setImgMeta(null);
   };
+
+  async function downscaleImageToJpeg(
+    file: File,
+    opts?: { maxSide?: number; quality?: number }
+  ): Promise<File> {
+    const maxSide = opts?.maxSide ?? 1600;
+    const quality = opts?.quality ?? 0.7;
+
+    // Decode
+    const bitmap = await createImageBitmap(file);
+
+    const { width, height } = bitmap;
+    const scale = Math.min(1, maxSide / Math.max(width, height));
+    const targetW = Math.max(1, Math.round(width * scale));
+    const targetH = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetW;
+    canvas.height = targetH;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas 2D context not available');
+
+    ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+
+    const blob: Blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error('Failed to encode image'))),
+        'image/jpeg',
+        quality
+      );
+    });
+
+    const outName =
+      file.name.replace(/\.(heic|heif|png|webp|jpg|jpeg)$/i, '') + '.jpg';
+    return new File([blob], outName, {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+  }
+
+  function isLikelyMobileHugeImage(
+    file: File,
+    meta: { width: number; height: number } | null
+  ) {
+    if (!meta) return false;
+    // Heuristik: typiska iPhone-foton
+    return meta.width >= 2500 && meta.height >= 2500 && file.size > 500_000;
+  }
 
   return (
     <Box pos="relative">
