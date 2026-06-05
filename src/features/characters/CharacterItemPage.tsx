@@ -19,6 +19,7 @@ import { CharacterItemsHeader } from './components/CharacterItemsHeader';
 import { CharacterItemsTable } from './components/CharacterItemsTable';
 import { useCategoryMap } from './hooks/useCategoryMap';
 import { useFilteredItems } from './hooks/useFilteredItems';
+import { SendItemModal } from '../items/SendItemModal';
 
 export function CharacterItemsPage() {
   const { characterId } = useParams();
@@ -30,6 +31,15 @@ export function CharacterItemsPage() {
 
   const [search, setSearch] = useState('');
   const [selectedItem, setSelectedItem] = useState<CharacterItem | null>(null);
+
+  const [sendItem, setSendItem] = useState<CharacterItem | null>(null);
+  const [sendOpened, { open: openSend, close: closeSend }] =
+    useDisclosure(false);
+
+  const onSendTo = (item: CharacterItem) => {
+    setSendItem(item);
+    openSend();
+  };
 
   if (!characterId) {
     return <Text c="dimmed">No character selected.</Text>;
@@ -113,6 +123,7 @@ export function CharacterItemsPage() {
           onAddOne={onAddOne}
           onRemoveOne={onRemoveOne}
           onDelete={onDelete}
+          onSendTo={onSendTo}
         />
       )}
 
@@ -131,6 +142,17 @@ export function CharacterItemsPage() {
         characterId={characterId}
         item={selectedItem}
       />
+      {sendItem && (
+        <SendItemModal
+          opened={sendOpened}
+          onClose={() => {
+            closeSend();
+            setSendItem(null);
+          }}
+          item={sendItem}
+          characterId={characterId}
+        />
+      )}
     </Paper>
   );
 }

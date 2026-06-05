@@ -10,6 +10,7 @@ export function CharacterItemsTable({
   onAddOne,
   onRemoveOne,
   onDelete,
+  onSendTo,
 }: {
   items: CharacterItem[];
   categoryMap: Map<string, string>;
@@ -18,6 +19,7 @@ export function CharacterItemsTable({
   onAddOne: (item: CharacterItem) => void;
   onRemoveOne: (item: CharacterItem) => void;
   onDelete: (item: CharacterItem) => void;
+  onSendTo: (item: CharacterItem) => void;
 }) {
   if (items.length === 0) {
     return <Text c="dimmed">No items match your search.</Text>;
@@ -54,6 +56,7 @@ export function CharacterItemsTable({
                 onAddOne={onAddOne}
                 onRemoveOne={onRemoveOne}
                 onDelete={onDelete}
+                onSendTo={onSendTo}
               />
             </Table.Td>
           </Table.Tr>

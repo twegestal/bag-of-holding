@@ -4,6 +4,7 @@ import { CiEdit } from 'react-icons/ci';
 import { GoPlus } from 'react-icons/go';
 import { FiMinus } from 'react-icons/fi';
 import { HiOutlineTrash } from 'react-icons/hi2';
+import { LuSend } from 'react-icons/lu';
 
 import type { CharacterItem } from '../../../types/character';
 
@@ -14,6 +15,7 @@ export function CharacterItemActionsMenu({
   onAddOne,
   onRemoveOne,
   onDelete,
+  onSendTo,
 }: {
   item: CharacterItem;
   disabled: boolean;
@@ -21,6 +23,7 @@ export function CharacterItemActionsMenu({
   onAddOne: (item: CharacterItem) => void;
   onRemoveOne: (item: CharacterItem) => void;
   onDelete: (item: CharacterItem) => void;
+  onSendTo?: (item: CharacterItem) => void;
 }) {
   return (
     <Menu shadow="md" width={180} position="bottom-end">
@@ -55,6 +58,18 @@ export function CharacterItemActionsMenu({
         >
           Remove one{item.quantity <= 1 ? ' (deletes)' : ''}
         </Menu.Item>
+
+        {onSendTo && (
+          <>
+            <Menu.Divider />
+            <Menu.Item
+              leftSection={<LuSend size={16} />}
+              onClick={() => onSendTo(item)}
+            >
+              Send to…
+            </Menu.Item>
+          </>
+        )}
 
         <Menu.Divider />
 

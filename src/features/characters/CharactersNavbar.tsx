@@ -10,6 +10,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { CiLogout, CiBag1 } from 'react-icons/ci';
 import { FaCoins } from 'react-icons/fa6';
 import { GiAxeSword } from 'react-icons/gi';
+import { RiGroupLine } from 'react-icons/ri';
 import { useCharacters } from './queries';
 import { useAuth } from '../../contexts/auth';
 import { useEffect, useState } from 'react';
@@ -26,7 +27,7 @@ export function CharactersNavbar({ onNavigate }: Props) {
   const { logout } = useAuth();
 
   const [openedCharacterId, setOpenedCharacterId] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export function CharactersNavbar({ onNavigate }: Props) {
   const isItemsRoute = location.pathname.includes('/items');
   const isCurrencyRoute = location.pathname.includes('/currency');
   const isMagicItemsRoute = location.pathname.includes('/magic-items');
+  const isPartyRoute = location.pathname.includes('/party');
 
   return (
     <>
@@ -92,6 +94,12 @@ export function CharactersNavbar({ onNavigate }: Props) {
                   leftSection={<GiAxeSword size={16} />}
                   active={isActiveCharacter && isMagicItemsRoute}
                   onClick={() => goTo(`/characters/${c.id}/magic-items`)}
+                />
+                <NavLink
+                  label="Party"
+                  leftSection={<RiGroupLine size={16} />}
+                  active={isActiveCharacter && isPartyRoute}
+                  onClick={() => goTo(`/characters/${c.id}/party`)}
                 />
               </NavLink>
             );
