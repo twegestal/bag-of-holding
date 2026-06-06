@@ -34,12 +34,9 @@ export function useCreateCharacterItem(characterId: string) {
           category_id: input.categoryId,
           value_gp: input.value_gp,
         })
-        .select(
-          'id,character_id,name,quantity,notes,weight,value_gp,category_id,created_at,updated_at'
-        )
 
         .select(
-          'id,character_id,name,quantity,notes,weight,category_id, value_gp, created_at'
+          'id,character_id,name,quantity,notes,weight,category_id, value_gp, created_at',
         )
         .single();
 
@@ -101,7 +98,7 @@ export function useUpdateCharacterItem(characterId: string) {
         .update(updatePayload)
         .eq('id', input.id)
         .select(
-          'id,character_id,name,quantity,notes,weight,value_gp,category_id,created_at,updated_at'
+          'id,character_id,name,quantity,notes,weight,value_gp,category_id,created_at,updated_at',
         )
         .single();
 
