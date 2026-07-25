@@ -80,10 +80,11 @@ export function useCharacterMagicItems(characterId: string) {
             slot,
             value,
             attunement_required,
+            attunement_note,
             has_art,
             sections
           )
-        `
+        `,
         )
         .eq('character_id', characterId)
         .order('created_at', { ascending: false });
@@ -91,6 +92,52 @@ export function useCharacterMagicItems(characterId: string) {
       if (error) throw error;
 
       return (data ?? []) as unknown as CharacterMagicItemRow[];
+    },
+  });
+}
+
+export function useUpdateMagicItem(characterId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      cardId,
+      card,
+    }: {
+      cardId: string;
+      card: ItemCard;
+    }) => {
+      const { error } = await supabase
+        .from('magic_item_cards')
+        .update(mapItemCardToInsert(card))
+        .eq('id', cardId);
+
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['character-magic-items', characterId],
+      });
+    },
+  });
+}
+
+export function useDeleteMagicItem(characterId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (linkId: string) => {
+      const { error } = await supabase
+        .from('character_magic_items')
+        .delete()
+        .eq('id', linkId);
+
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['character-magic-items', characterId],
+      });
     },
   });
 }

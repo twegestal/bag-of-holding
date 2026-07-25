@@ -40,6 +40,7 @@ export type CharacterMagicItemRow = {
     slot: string;
     value: string;
     attunement_required: boolean;
+    attunement_note: string;
     has_art: boolean;
     sections: Array<{ title: string; body: string }>;
   };
