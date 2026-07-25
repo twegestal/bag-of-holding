@@ -141,3 +141,35 @@ export function useDeleteMagicItem(characterId: string) {
     },
   });
 }
+
+export function useTransferMagicItem(characterId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      linkId,
+      toCharacterId,
+    }: {
+      linkId: string;
+      toCharacterId: string;
+    }) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase.rpc('transfer_magic_item', {
+        p_link_id: linkId,
+        p_from_character: characterId,
+        p_to_character: toCharacterId,
+        p_user_id: user.id,
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['character-magic-items', characterId],
+      });
+    },
+  });
+}

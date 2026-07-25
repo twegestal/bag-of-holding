@@ -17,6 +17,8 @@ import { notifications } from '@mantine/notifications';
 import { HiDotsVertical } from 'react-icons/hi';
 import { CiEdit } from 'react-icons/ci';
 import { HiOutlineTrash } from 'react-icons/hi2';
+import { LuSend } from 'react-icons/lu';
+import { SendMagicItemModal } from './SendMagicItemModal';
 import {
   useCharacterMagicItems,
   useDeleteMagicItem,
@@ -36,9 +38,18 @@ export function MagicItemsGrid() {
   const [editOpened, { open: openEdit, close: closeEdit }] =
     useDisclosure(false);
 
+  const [sendItem, setSendItem] = useState<CharacterMagicItemRow | null>(null);
+  const [sendOpened, { open: openSend, close: closeSend }] =
+    useDisclosure(false);
+
   const onEdit = (row: CharacterMagicItemRow) => {
     setSelectedItem(row);
     openEdit();
+  };
+
+  const onSendTo = (row: CharacterMagicItemRow) => {
+    setSendItem(row);
+    openSend();
   };
 
   const onDelete = (row: CharacterMagicItemRow) => {
@@ -105,6 +116,13 @@ export function MagicItemsGrid() {
                       </Menu.Item>
                       <Menu.Divider />
                       <Menu.Item
+                        leftSection={<LuSend size={16} />}
+                        onClick={() => onSendTo(row)}
+                      >
+                        Send to…
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
                         color="red"
                         leftSection={<HiOutlineTrash size={16} />}
                         onClick={() => onDelete(row)}
@@ -166,6 +184,17 @@ export function MagicItemsGrid() {
         item={selectedItem}
         characterId={characterId}
       />
+      {sendItem && (
+        <SendMagicItemModal
+          opened={sendOpened}
+          onClose={() => {
+            closeSend();
+            setSendItem(null);
+          }}
+          item={sendItem}
+          characterId={characterId}
+        />
+      )}
     </>
   );
 }
