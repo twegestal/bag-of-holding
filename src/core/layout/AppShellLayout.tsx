@@ -10,17 +10,17 @@ export function AppShellLayout() {
   return (
     <AppShell
       padding="md"
-      header={{ height: 60 }}
+      header={{ height: 'calc(60px + var(--safe-top))' }}
       navbar={{
         width: 300,
         breakpoint: 'sm',
         collapsed: { mobile: !opened },
       }}
     >
-      <AppShell.Header>
+      <AppShell.Header px="md" style={{ paddingTop: 'var(--safe-top)' }}>
+        {' '}
         <Group h="100%" px="md" gap="sm">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-
           <Group gap="xs">
             <SiDungeonsanddragons size={28} />
             <Text fw={700}>Bag of Hoarding</Text>
