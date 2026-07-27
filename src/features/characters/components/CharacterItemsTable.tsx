@@ -1,4 +1,4 @@
-import { Table, Text, Stack, Card, Group, Badge, Box } from '@mantine/core';
+import { Table, Text } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import type { CharacterItem } from '../../../types/character';
 import { CharacterItemActionsMenu } from './CharacterItemActionsMenu';
@@ -33,39 +33,28 @@ export function CharacterItemsTable(props: Props) {
 
   if (isMobile) {
     return (
-      <Stack gap="sm">
-        {items.map((i) => (
-          <Card key={i.id} withBorder radius="md" p="sm">
-            <Group justify="space-between" align="flex-start" wrap="nowrap">
-              <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
-                <Text fw={600} truncate>
+      <Table verticalSpacing="sm">
+        <Table.Tbody>
+          {items.map((i) => (
+            <Table.Tr key={i.id}>
+              <Table.Td style={{ width: '100%' }}>
+                <Text size="sm" fw={500} style={{ lineHeight: 1.3 }}>
                   {i.name}
                 </Text>
-
-                <Group gap="xs">
-                  <Badge variant="light" size="sm">
-                    ×{i.quantity}
-                  </Badge>
-                  {i.category_id && categoryMap.get(i.category_id) && (
-                    <Badge variant="outline" size="sm">
-                      {categoryMap.get(i.category_id)}
-                    </Badge>
-                  )}
-                  {i.value_gp != null && (
-                    <Badge variant="outline" size="sm" color="yellow">
-                      {i.value_gp} gp
-                    </Badge>
-                  )}
-                </Group>
-
-                {i.notes && (
-                  <Text size="xs" c="dimmed" lineClamp={2}>
-                    {i.notes}
+                {(i.category_id || i.notes) && (
+                  <Text size="xs" c="dimmed" style={{ lineHeight: 1.3 }}>
+                    {[categoryMap.get(i.category_id ?? ''), i.notes]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </Text>
                 )}
-              </Stack>
-
-              <Box style={{ flexShrink: 0 }}>
+              </Table.Td>
+              <Table.Td style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
+                <Text size="sm" c="dimmed">
+                  ×{i.quantity}
+                </Text>
+              </Table.Td>
+              <Table.Td style={{ whiteSpace: 'nowrap', paddingLeft: 0 }}>
                 <CharacterItemActionsMenu
                   item={i}
                   disabled={actionsDisabled}
@@ -75,11 +64,11 @@ export function CharacterItemsTable(props: Props) {
                   onDelete={onDelete}
                   onSendTo={onSendTo}
                 />
-              </Box>
-            </Group>
-          </Card>
-        ))}
-      </Stack>
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
     );
   }
 
