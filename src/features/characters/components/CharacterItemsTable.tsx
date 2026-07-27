@@ -41,9 +41,13 @@ export function CharacterItemsTable(props: Props) {
                 <Text size="sm" fw={500} style={{ lineHeight: 1.3 }}>
                   {i.name}
                 </Text>
-                {(i.category_id || i.notes) && (
+                {(i.category_id || i.notes || i.value_gp != null) && (
                   <Text size="xs" c="dimmed" style={{ lineHeight: 1.3 }}>
-                    {[categoryMap.get(i.category_id ?? ''), i.notes]
+                    {[
+                      categoryMap.get(i.category_id ?? ''),
+                      i.value_gp != null ? `${i.value_gp} gp` : null,
+                      i.notes,
+                    ]
                       .filter(Boolean)
                       .join(' · ')}
                   </Text>
