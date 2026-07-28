@@ -1,10 +1,12 @@
 import {
   AppShell,
-  NavLink,
-  Stack,
-  Skeleton,
+  Avatar,
   Divider,
+  NavLink,
   ScrollArea,
+  Skeleton,
+  Stack,
+  Text,
 } from '@mantine/core';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { CiLogout, CiBag1 } from 'react-icons/ci';
@@ -24,7 +26,7 @@ export function CharactersNavbar({ onNavigate }: Props) {
   const location = useLocation();
   const { characterId } = useParams();
   const { data, isLoading } = useCharacters();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const [openedCharacterId, setOpenedCharacterId] = useState<string | null>(
     null,
@@ -44,8 +46,26 @@ export function CharactersNavbar({ onNavigate }: Props) {
   const isMagicItemsRoute = location.pathname.includes('/magic-items');
   const isPartyRoute = location.pathname.includes('/party');
 
+  const displayName =
+    user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? user?.email;
+  const avatarUrl =
+    user?.user_metadata?.picture ?? user?.user_metadata?.avatar_url;
+
   return (
     <>
+      <AppShell.Section p="sm">
+        <Stack gap={4}>
+          <Avatar src={avatarUrl} radius="xl" size="md" />
+          <Text size="sm" fw={600} truncate>
+            {displayName}
+          </Text>
+          <Text size="xs" c="dimmed" truncate>
+            {user?.email}
+          </Text>
+        </Stack>
+        <Divider mt="sm" />
+      </AppShell.Section>
+
       <AppShell.Section>
         <NavLink
           label="Characters"
@@ -82,7 +102,6 @@ export function CharactersNavbar({ onNavigate }: Props) {
                   active={isActiveCharacter && isItemsRoute}
                   onClick={() => goTo(`/characters/${c.id}/items`)}
                 />
-
                 <NavLink
                   label="Currency"
                   leftSection={<FaCoins size={16} />}
