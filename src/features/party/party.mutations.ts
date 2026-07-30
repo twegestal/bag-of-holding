@@ -44,7 +44,6 @@ export function useCreateParty() {
   });
 }
 
-// Gå med via invite code
 export function useJoinParty() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -59,18 +58,17 @@ export function useJoinParty() {
       const user = userData.user;
       if (!user) throw new Error('Not authenticated');
 
-      const { data: party, error: partyError } = await supabase
-        .from('parties')
-        .select('id')
-        .eq('invite_code', inviteCode.trim().toLowerCase())
-        .single();
+      const { data: partyId, error: partyError } = await supabase.rpc(
+        'get_party_by_invite_code',
+        { p_code: inviteCode.trim().toLowerCase() },
+      );
 
-      if (partyError) throw new Error('Invalid invite code');
+      if (partyError || !partyId) throw new Error('Invalid invite code');
 
       const { error: memberError } = await supabase
         .from('party_members')
         .insert({
-          party_id: party.id,
+          party_id: partyId,
           character_id: characterId,
           user_id: user.id,
         });

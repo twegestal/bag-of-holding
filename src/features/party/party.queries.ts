@@ -7,18 +7,22 @@ export function useCharacterParty(characterId: string | undefined) {
     queryKey: ['character-party', characterId],
     enabled: Boolean(characterId),
     queryFn: async (): Promise<Party | null> => {
-      const { data, error } = await supabase
+      const { data: member, error: memberError } = await supabase
         .from('party_members')
-        .select(
-          'party:parties(id, name, owner_user_id, invite_code, created_at)',
-        )
+        .select('party_id')
         .eq('character_id', characterId)
         .maybeSingle();
 
-      if (error) throw error;
-      if (!data?.party) return null;
+      if (memberError) throw memberError;
+      if (!member) return null;
 
-      const party = Array.isArray(data.party) ? data.party[0] : data.party;
+      const { data: party, error: partyError } = await supabase
+        .from('parties')
+        .select('id, name, owner_user_id, invite_code, created_at')
+        .eq('id', member.party_id)
+        .maybeSingle();
+
+      if (partyError) throw partyError;
       return (party as Party) ?? null;
     },
   });
