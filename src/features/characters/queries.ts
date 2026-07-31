@@ -6,9 +6,14 @@ export function useCharacters() {
   return useQuery({
     queryKey: ['characters'],
     queryFn: async (): Promise<Character[]> => {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+      if (!user) throw new Error('Not authenticated');
+
       const { data, error } = await supabase
         .from('characters')
         .select('id,name,created_at')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -25,7 +30,7 @@ export function useCharacterItems(characterId: string | undefined) {
       const { data, error } = await supabase
         .from('character_items')
         .select(
-          'id,character_id,name,quantity,notes,weight,created_at,category_id, value_gp'
+          'id,character_id,name,quantity,notes,weight,created_at,category_id, value_gp',
         )
         .eq('character_id', characterId)
         .order('created_at', { ascending: true });
