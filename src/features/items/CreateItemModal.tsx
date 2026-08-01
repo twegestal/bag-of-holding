@@ -64,6 +64,7 @@ export function CreateItemModal({ opened, onClose, characterId }: Props) {
         <TextInput
           label="Name"
           type="tel"
+          inputMode="text"
           placeholder="e.g. Longsword"
           {...form.getInputProps('name')}
           autoFocus
